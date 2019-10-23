@@ -46,23 +46,24 @@ decl_module! {
     pub struct Module<T: Trait> for enum Call where origin: T::Origin {
 		pub fn setApprovalForAll(origin, operator: T::AccountId, _approved: bool) -> result::Result {
 			let sender = ensure_signed(origin)?;
-			ensure!(sender != operator, "can not set approval for owner")?;
+			ensure!(sender != operator, "can not set approval for owner");
 			<OperatorApprovals<T>>::insert(&sender,(&operator, _approved));
 
 			ok(())
-		};
+		}
+
 		pub fn isApprovedForAll(origin, operator: AccountId) -> bool {
 			let sender = ensure_signed(origin)?;
 			if (!<OperatorApprovals<T>>::exists(&sender)) {
 				return false
-			};
+			}
 			let (ope, isApproved) = Self::approval_operator(&sender);
 			if (ope == operator && isApproved == true) {
 				return true
 			} else {
 				return false
-			};
-		};
+			}
+		}
 
     }
 }
