@@ -1,4 +1,5 @@
 use support::{decl_module, decl_storage};
+use rstd::result;
 //use sr_primitives::traits::Member;
 use codec::{Encode, Decode};
 
@@ -7,7 +8,7 @@ pub trait Trait: system::Trait {}
 type Uint256 = u32;
 
 #[cfg_attr(feature = "std", derive(Debug, PartialEq, Eq))]
-#[derive(Encode, Decode)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
 pub struct PRC721Metadata {
 	name: Option<String>,
 	symbol: Option<String>,
@@ -43,6 +44,26 @@ decl_storage! {
 
 decl_module! {
     pub struct Module<T: Trait> for enum Call where origin: T::Origin {
+		pub fn setApprovalForAll(origin, operator: T::AccountId, _approved: bool) -> result::Result {
+			let sender = ensure_signed(origin)?;
+			ensure!(sender != operator, "can not set approval for owner")?;
+			<OperatorApprovals<T>>::insert(&sender,(&operator, _approved));
+
+			ok(())
+		};
+		pub fn isApprovedForAll(origin, operator: AccountId) -> bool {
+			let sender = ensure_signed(origin)?;
+			if (!<OperatorApprovals<T>>::exists(&sender)) {
+				return false
+			};
+			let (ope, isApproved) = Self::approval_operator(&sender);
+			if (ope == operator && isApproved == true) {
+				return true
+			} else {
+				return false
+			};
+		};
+
     }
 }
 
@@ -59,8 +80,7 @@ impl<T: Trait> Module<T> {
     //pub fn approve(to: AccountId, tokenId: Uint256) {};
     //pub fn getApproved(tokenId: Uint256) -> AccountId {};
 
-    //pub fn setApprovalForAll(operator: AccountId, _approved: bool) {};
-    //pub fn isApprovedForAll(owner: AccountId, operator: AccountId) -> bool {};
 
     //pub fn safeTransferFrom(from: AccountId, to: AccountId, tokenId: Uint256, data: bytes){};
 }
+
