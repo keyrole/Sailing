@@ -36,6 +36,9 @@ decl_storage! {
 		//mapping (address => Counters.Counter) private _ownedTokensCount;
 		OwnedTokensCount get(owned_token_count): map(T::AccountId) => Uint256;
 
+		// Mapping from owner to tokens
+		OwnedTokens get(owned_tokens): map (T::AccountId, Option<T::TokenIndex>) => Uint256;
+
 		// Mapping from owner to operator approvals
 		//mapping (address => mapping (address => bool)) private _operatorApprovals;
 		OperatorApprovals get(approval_operator): map(T::AccountId) => (T::AccountId, bool);
@@ -48,7 +51,12 @@ decl_module! {
 			let sender = ensure_signed(origin)?;
 			ensure!(sender != operator, "can not set approval for owner");
 			<OperatorApprovals<T>>::insert(&sender,(&operator, _approved));
-
+			if (!_approved) return Ok(("_approved equel false"))
+			let n = Self::owned_token_count(&sender);
+			for i in (0..n).iter() {
+				let id = Self::owned_tokens((&sender, i));
+				<TokenApprovals<T>>::insert(id, &operator);
+			} 
 			ok(())
 		}
 
