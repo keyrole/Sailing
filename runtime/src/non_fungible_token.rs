@@ -37,7 +37,7 @@ decl_storage! {
 		OwnedTokensCount get(owned_token_count): map(T::AccountId) => Uint256;
 
 		// Mapping from owner to tokens
-		OwnedTokens get(owned_tokens): map (T::AccountId, Option<T::TokenIndex>) => Uint256;
+		OwnedTokens get(owned_tokens): map (T::AccountId, Uint256) => Uint256;
 
 		// Mapping from owner to operator approvals
 		//mapping (address => mapping (address => bool)) private _operatorApprovals;
