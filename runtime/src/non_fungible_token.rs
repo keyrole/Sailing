@@ -2,6 +2,7 @@ use support::{decl_module, decl_storage};
 use rstd::result;
 //use sr_primitives::traits::Member;
 use codec::{Encode, Decode};
+use system::ensure_signed;
 
 pub trait Trait: system::Trait {}
 
@@ -51,22 +52,24 @@ decl_module! {
 			let sender = ensure_signed(origin)?;
 			ensure!(sender != operator, "can not set approval for owner");
 			<OperatorApprovals<T>>::insert(&sender,(&operator, _approved));
-			if (!_approved) return Ok(("_approved equel false"))
+			if !_approved {
+				return Ok("_approved equel false")
+			} 
 			let n = Self::owned_token_count(&sender);
 			for i in (0..n).iter() {
 				let id = Self::owned_tokens((&sender, i));
 				<TokenApprovals<T>>::insert(id, &operator);
 			} 
-			ok(())
+			Ok(())
 		}
 
-		pub fn isApprovedForAll(origin, operator: AccountId) -> bool {
+		pub fn isApprovedForAll(origin, operator: T::AccountId) -> bool {
 			let sender = ensure_signed(origin)?;
-			if (!<OperatorApprovals<T>>::exists(&sender)) {
+			if !<OperatorApprovals<T>>::exists(&sender) {
 				return false
 			}
 			let (ope, isApproved) = Self::approval_operator(&sender);
-			if (ope == operator && isApproved == true) {
+			if ope == operator && isApproved == true {
 				return true
 			} else {
 				return false
